@@ -242,6 +242,7 @@ export class ChatBotCLI {
         ...this.context.conversationState,
         phase: response.newPhase,
         engagementScore: response.newScore,
+        messages: response.updatedConversationMessages,
         lastFanMessageAt: new Date(),
       }
 

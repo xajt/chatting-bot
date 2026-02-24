@@ -37,6 +37,7 @@ export interface ConversationState {
 
 export interface BotResponse {
   messages: string[]
+  updatedConversationMessages: ConversationMessage[]
   newPhase: Phase
   newScore: number
   scoreBreakdown: ScoreBreakdown
@@ -153,11 +154,15 @@ export class ConversationEngine {
       createdAt: new Date(),
     }))
 
+    // Combine all messages for return
+    const allUpdatedMessages = [...updatedMessages, ...botMsgs]
+
     // Determine if we should offer PPV
     const shouldOfferPPV = this.shouldOfferPPV(newPhase, scoreBreakdown.total)
 
     return {
       messages: botMessages,
+      updatedConversationMessages: allUpdatedMessages,
       newPhase,
       newScore: scoreBreakdown.total,
       scoreBreakdown,
