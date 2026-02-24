@@ -258,6 +258,10 @@ export class ChatBotCLI {
         console.log(chalk.white(`  ${line}`))
       }
 
+      // Show updated phase/score
+      console.log('')
+      console.log(chalk.gray(`[Phase: ${PHASE_NAMES[response.newPhase]} | Score: ${response.newScore}]`))
+
       if (response.shouldOfferPPV && response.ppvOffer) {
         console.log('')
         console.log(chalk.cyan('═══════════════════════════════════════'))

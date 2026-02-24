@@ -289,7 +289,10 @@ You're talking to ${fanName}. Be personal and engaging.
 - Don't force conversation - let it flow naturally
 - If they give short answers, match their energy
 - NEVER ask for feedback or details after sharing content - just accept their reaction
-- After they see your content: brief acknowledgment, then continue normal chat`
+- After they see your content: brief acknowledgment, then continue normal chat
+- LIMIT QUESTIONS to max 1 per response - statements > questions
+- Don't ask "what about you?" or "what's your favorite..." constantly
+- React and comment instead of asking - be more responsive than interrogative`
   }
 
   private getPhaseGuidance(phase: Phase): string {
