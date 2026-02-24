@@ -36,4 +36,21 @@ export function closeDatabase(): void {
   }
 }
 
+export function resetDatabase(): void {
+  closeDatabase()
+  // Delete the database file if it exists
+  if (fs.existsSync(DB_PATH)) {
+    fs.unlinkSync(DB_PATH)
+  }
+  // Also delete WAL and SHM files
+  const walPath = DB_PATH + '-wal'
+  const shmPath = DB_PATH + '-shm'
+  if (fs.existsSync(walPath)) {
+    fs.unlinkSync(walPath)
+  }
+  if (fs.existsSync(shmPath)) {
+    fs.unlinkSync(shmPath)
+  }
+}
+
 export const DB_PATH_EXPORT = DB_PATH
