@@ -16,4 +16,6 @@ export default defineConfig({
       statements: 80,
     },
   },
+  // Don't search parent directories for config files
+  configFile: false,
 })
