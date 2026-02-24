@@ -48,6 +48,29 @@ export class ConversationEngine {
   private readonly client = getDeepseekClient()
   private readonly persona = getPersona()
 
+  /**
+   * Create initial conversation state for a fan
+   */
+  createState(fanId: string, fanName: string): ConversationState {
+    return {
+      fanId,
+      fanName,
+      phase: 1,
+      engagementScore: 0,
+      scoreBreakdown: {
+        total: 0,
+        messageCount: 0,
+        sexualKeywords: 0,
+        responseTime: 0,
+        purchaseHistory: 0,
+        sentiment: 0,
+      },
+      powerDynamic: 'neutral',
+      messages: [],
+      lastFanMessageAt: null,
+    }
+  }
+
   async processFanMessage(
     state: ConversationState,
     fanMessage: string

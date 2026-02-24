@@ -1,15 +1,15 @@
 import * as dotenv from 'dotenv'
 import * as path from 'node:path'
-import * as readline from 'node:readline'
 
 // Load environment variables first
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 
-import { getDeepseekClient, resetDeepseekClient } from './api/deepseek-client'
+import { getCLI } from './cli'
 import { runMigrations } from './db/migrations'
 import { runSeed } from './db/seed'
-import { createConversationEngine, type ConversationState } from './chat'
-import { getPersona, PHASE_NAMES, type Phase } from './persona'
+import { getDeepseekClient, resetDeepseekClient } from './api/deepseek-client'
+import { createConversationEngine } from './chat'
+import { getPersona, PHASE_NAMES } from './persona'
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
@@ -19,14 +19,14 @@ async function main(): Promise<void> {
     case 'db:init':
       console.log('Initializing database...')
       runMigrations()
-      console.log('Database initialized successfully!')
+      console.log('✅ Database initialized successfully!')
       break
 
     case 'db:seed':
       console.log('Seeding database...')
       runMigrations()
       runSeed()
-      console.log('Database seeded successfully!')
+      console.log('✅ Database seeded successfully!')
       break
 
     case 'test:api':
@@ -53,7 +53,9 @@ async function main(): Promise<void> {
 
     case 'dev':
     default:
-      await startInteractiveCLI()
+      // Start CLI
+      const cli = getCLI()
+      cli.start()
       break
   }
 }
@@ -68,23 +70,7 @@ async function testConversation(): Promise<void> {
 
   const engine = createConversationEngine()
 
-  const state: ConversationState = {
-    fanId: 'test-fan',
-    fanName: 'Tom',
-    phase: 1,
-    engagementScore: 0,
-    scoreBreakdown: {
-      total: 0,
-      messageCount: 0,
-      sexualKeywords: 0,
-      responseTime: 0,
-      purchaseHistory: 0,
-      sentiment: 0,
-    },
-    powerDynamic: 'neutral',
-    messages: [],
-    lastFanMessageAt: null,
-  }
+  const state = engine.createState('test-fan', 'Tom')
 
   const testMessages = [
     'Hey!',
@@ -107,13 +93,10 @@ async function testConversation(): Promise<void> {
       console.log(`  ${line}`)
     }
 
-    // Update state
     currentState = {
       ...currentState,
       phase: response.newPhase,
       engagementScore: response.newScore,
-      scoreBreakdown: response.scoreBreakdown,
-      powerDynamic: response.powerDynamic,
       lastFanMessageAt: new Date(),
     }
 
@@ -123,99 +106,6 @@ async function testConversation(): Promise<void> {
   }
 
   console.log('\n✅ Conversation test complete!')
-}
-
-async function startInteractiveCLI(): Promise<void> {
-  console.log('🤖 OF Chatbot v1.0')
-  console.log('')
-  console.log('Interactive Chat Mode')
-  console.log('Type your message and press Enter to chat.')
-  console.log('Type /quit to exit.')
-  console.log('')
-
-  const persona = getPersona()
-  console.log(`Persona: ${persona.name}\n`)
-
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  })
-
-  const engine = createConversationEngine()
-
-  const state: ConversationState = {
-    fanId: 'interactive-fan',
-    fanName: 'You',
-    phase: 1,
-    engagementScore: 0,
-    scoreBreakdown: {
-      total: 0,
-      messageCount: 0,
-      sexualKeywords: 0,
-      responseTime: 0,
-      purchaseHistory: 0,
-      sentiment: 0,
-    },
-    powerDynamic: 'neutral',
-    messages: [],
-    lastFanMessageAt: null,
-  }
-
-  let currentState = state
-
-  const prompt = (): void => {
-    rl.question('\n> ', async (input) => {
-      const trimmed = input.trim()
-
-      if (trimmed === '/quit' || trimmed === '/exit') {
-        console.log('\nGoodbye! 👋')
-        rl.close()
-        return
-      }
-
-      if (!trimmed) {
-        prompt()
-        return
-      }
-
-      try {
-        const response = await engine.processFanMessage(currentState, trimmed)
-
-        console.log(`\n[Phase: ${PHASE_NAMES[response.newPhase]}] [Score: ${response.newScore}]`)
-
-        console.log(`\n${persona.name}:`)
-        for (const line of response.messages) {
-          console.log(`  ${line}`)
-        }
-
-        if (response.shouldOfferPPV) {
-          console.log('\n[💡 PPV opportunity detected]')
-        }
-
-        // Update state
-        currentState = {
-          ...currentState,
-          phase: response.newPhase,
-          engagementScore: response.newScore,
-          scoreBreakdown: response.scoreBreakdown,
-          powerDynamic: response.powerDynamic,
-          lastFanMessageAt: new Date(),
-        }
-      } catch (error) {
-        console.error('\n❌ Error:', error instanceof Error ? error.message : error)
-      }
-
-      prompt()
-    })
-  }
-
-  // Send initial greeting
-  console.log(`${persona.name}:`)
-  console.log(`  heyy! 🥰`)
-  console.log(`  omg I've been scrolling Netflix for like an hour and I swear I've seen everything...`)
-  console.log(`  what are you up to? I need distraction from my indecisiveness haha`)
-
-  prompt()
 }
 
 main().catch((error) => {

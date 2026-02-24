@@ -18,6 +18,13 @@ export interface PPVOffer {
   originalPrice: number
 }
 
+export interface HandleObjectionResult {
+  type: string
+  response: string
+  discountedPrice?: number
+  discountOffered: boolean
+}
+
 /**
  * Get a random PPV offer
  */

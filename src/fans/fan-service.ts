@@ -193,7 +193,7 @@ export class FanService {
     if (existing) {
       return existing
     }
-    return this.repo.create({ name, nickname })
+    return this.repo.create(nickname ? { name, nickname } : { name })
   }
 
   /**

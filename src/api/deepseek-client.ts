@@ -8,6 +8,9 @@ import {
 } from './types'
 import { withRetry } from './retry-handler'
 
+// Re-export types for convenience
+export type { ChatMessage, ChatCompletionResponse, DeepseekConfig, DeepseekError }
+
 // Load environment variables
 dotenv.config({ path: path.resolve(process.cwd(), '.env') })
 

@@ -37,9 +37,18 @@ export function buildContextWindow(
   // Older messages that need summarization
   const olderMessages = messages.slice(0, -windowSize)
 
+  const summary = olderMessages.length > 0 ? generateSimpleSummary(olderMessages) : undefined
+
+  if (summary) {
+    return {
+      messages: recentMessages.map(toChatMessage),
+      summary,
+      totalMessages,
+    }
+  }
+
   return {
     messages: recentMessages.map(toChatMessage),
-    summary: olderMessages.length > 0 ? generateSimpleSummary(olderMessages) : undefined,
     totalMessages,
   }
 }
