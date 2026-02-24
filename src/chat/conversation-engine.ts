@@ -93,31 +93,41 @@ export class ConversationEngine {
       ? now.getTime() - state.lastFanMessageAt.getTime()
       : 0
 
-    // Detect sexual keywords
-    const sexualKeywords = detectSexualKeywords(fanMessage)
+    // Detect sexual keywords from current message
+    const currentKeywords = detectSexualKeywords(fanMessage)
 
-    // Detect sentiment
+    // Collect all sexual keywords from conversation history
+    const allKeywords: string[] = []
+    for (const msg of state.messages) {
+      if (msg.role === 'fan') {
+        allKeywords.push(...detectSexualKeywords(msg.content))
+      }
+    }
+    // Add current message keywords
+    allKeywords.push(...currentKeywords)
+
+    // Detect sentiment from current message
     const sentiment = detectSentiment(fanMessage)
 
     // Get purchase count (would come from fan service in real implementation)
     const purchaseCount = 0 // TODO: Get from fan profile
 
-    // Calculate new score
+    // Calculate new score with accumulated keywords
     const scoreBreakdown = calculateScore({
       messageCount: state.messages.filter((m) => m.role === 'fan').length + 1,
-      sexualKeywords,
+      sexualKeywords: allKeywords,
       responseTimeMs,
       purchaseCount,
       sentiment,
     })
 
     // Check for phase acceleration (explicit content)
-    const hasExplicitContent = sexualKeywords.length > 0
+    const hasExplicitContent = currentKeywords.length > 0
     let newPhase = state.phase
 
     if (hasExplicitContent && state.phase < 3) {
       // Jump to phase 3 or 4 if explicit content detected
-      newPhase = sexualKeywords.length >= 3 ? 4 : 3
+      newPhase = currentKeywords.length >= 3 ? 4 : 3
     } else {
       // Normal phase progression
       newPhase = this.calculatePhaseTransition(state, scoreBreakdown.total)
