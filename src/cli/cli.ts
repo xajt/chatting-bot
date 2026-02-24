@@ -258,9 +258,15 @@ export class ChatBotCLI {
         console.log(chalk.white(`  ${line}`))
       }
 
-      if (response.shouldOfferPPV) {
+      if (response.shouldOfferPPV && response.ppvOffer) {
         console.log('')
-        console.log(chalk.gray('[💡 PPV opportunity - use /ppv to offer]'))
+        console.log(chalk.cyan('═══════════════════════════════════════'))
+        console.log(chalk.cyan(`  📦 ${response.ppvOffer.title}`))
+        console.log(chalk.cyan(`  💰 $${(response.ppvOffer.price / 100).toFixed(2)}`))
+        if (response.ppvOffer.previewText) {
+          console.log(chalk.gray(`  ${response.ppvOffer.previewText}`))
+        }
+        console.log(chalk.cyan('═══════════════════════════════════════'))
       }
     } catch (error) {
       console.log(chalk.red('Error processing message'))

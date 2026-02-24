@@ -23,6 +23,7 @@ import {
   type ConversationMessage,
   type ContextWindow,
 } from './context-builder'
+import { getPPVRepository } from '../ppv/ppv-repository'
 
 export interface ConversationState {
   fanId: string
@@ -35,6 +36,14 @@ export interface ConversationState {
   lastFanMessageAt: Date | null
 }
 
+export interface PPVOffer {
+  id: string
+  title: string
+  contentText: string
+  price: number
+  previewText?: string
+}
+
 export interface BotResponse {
   messages: string[]
   updatedConversationMessages: ConversationMessage[]
@@ -43,6 +52,7 @@ export interface BotResponse {
   scoreBreakdown: ScoreBreakdown
   powerDynamic: PowerDynamic
   shouldOfferPPV: boolean
+  ppvOffer?: PPVOffer
 }
 
 export class ConversationEngine {
@@ -160,7 +170,22 @@ export class ConversationEngine {
     // Determine if we should offer PPV
     const shouldOfferPPV = this.shouldOfferPPV(newPhase, scoreBreakdown.total)
 
-    return {
+    // Get PPV offer if we should offer one
+    let ppvOffer: PPVOffer | undefined
+    if (shouldOfferPPV) {
+      const ppv = getPPVRepository().getRandom()
+      if (ppv) {
+        ppvOffer = {
+          id: ppv.id,
+          title: ppv.title,
+          contentText: ppv.contentText,
+          price: ppv.price,
+          previewText: ppv.previewText,
+        }
+      }
+    }
+
+    const response: BotResponse = {
       messages: botMessages,
       updatedConversationMessages: allUpdatedMessages,
       newPhase,
@@ -169,6 +194,12 @@ export class ConversationEngine {
       powerDynamic,
       shouldOfferPPV,
     }
+
+    if (ppvOffer) {
+      response.ppvOffer = ppvOffer
+    }
+
+    return response
   }
 
   private calculatePhaseTransition(state: ConversationState, newScore: number): Phase {
@@ -256,7 +287,9 @@ You're talking to ${fanName}. Be personal and engaging.
 - Follow up on what they said - don't introduce random new topics
 - Be natural like a real person texting, not a bot trying to entertain
 - Don't force conversation - let it flow naturally
-- If they give short answers, match their energy`
+- If they give short answers, match their energy
+- NEVER ask for feedback or details after sharing content - just accept their reaction
+- After they see your content: brief acknowledgment, then continue normal chat`
   }
 
   private getPhaseGuidance(phase: Phase): string {
