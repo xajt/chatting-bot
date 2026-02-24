@@ -215,9 +215,9 @@ export class ChatBotCLI {
    */
   private getGreeting(fanName: string): string[] {
     const greetings = [
-      [`heyy ${fanName}! 🥰`, "omg I've been scrolling Netflix for like an hour...", 'what are you up to?'],
-      [`hey ${fanName}!`, "I just got back from the beach and I'm literally SO sunburnt 😭", "how's your day?"],
-      [`hii ${fanName} ✨`, "I've been so bored today, help entertain me?", 'what are you up to?'],
+      [`heyy! 🥰`, `nice to meet you ${fanName}!`, 'what should I call you? do you have a nickname?'],
+      [`hii! ✨`, `I'm Luna`, `what's your name babe?`],
+      [`hey there 😊`, `I'm Luna, what's your name?`, `where are you from?`],
     ]
 
     return greetings[Math.floor(Math.random() * greetings.length)]!
